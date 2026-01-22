@@ -7,14 +7,30 @@ data class AnimeEntity(
     @PrimaryKey
     val malId: Int,
     val title: String,
-    val synopsis: String?,
+    val titleEnglish: String?,
+    val titleJapanese: String?,
+    val url: String?,
+    val type: String?,
+    val source: String?,
     val episodes: Int?,
+    val status: String?,
+    val airing: Boolean?,
+    val duration: String?,
+    val rating: String?,
     val score: Double?,
     val rank: Int?,
     val popularity: Int?,
+    val members: Int?,
+    val favorites: Int?,
+    val synopsis: String?,
+    val background: String?,
+    val season: String?,
+    val year: Int?,
+    val broadcastString: String?, // Storing as String to simplify
+    val airedString: String?,     // Storing as String to simplify
     val posterUrl: String?,
     val trailerUrl: String?,
-    val isFavorite: Boolean = false // User preference (bonus/extra)
+    val isFavorite: Boolean = false // User preference
 )
 
 @Entity(tableName = "genre_table")
