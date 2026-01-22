@@ -19,7 +19,7 @@ object AnimeMapper {
                 synopsis = dto.synopsis,
                 episodes = dto.episodes,
                 score = dto.score,
-                rank = 0, // API provides rank usually but I didn't add it to DTO. It's optional for display.
+                rank = 0,
                 popularity = 0,
                 posterUrl = dto.images.jpg.imageUrl,
                 trailerUrl = dto.trailer?.url

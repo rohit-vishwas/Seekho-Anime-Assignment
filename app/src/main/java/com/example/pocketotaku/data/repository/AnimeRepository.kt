@@ -3,7 +3,9 @@ package com.example.pocketotaku.data.repository
 import androidx.room.withTransaction
 import com.example.pocketotaku.data.api.JikanApiService
 import com.example.pocketotaku.data.db.AnimeDatabase
+import com.example.pocketotaku.data.db.AnimeEntity
 import com.example.pocketotaku.utils.Resource
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
@@ -13,19 +15,9 @@ class AnimeRepository @Inject constructor(
 ) {
     private val dao = db.animeDao()
 
-    fun getTopAnime() = flow {
+    fun getTopAnime(): Flow<Resource<List<AnimeEntity>>> = flow {
         emit(Resource.Loading())
 
-        // 1. Emit cached data immediately
-        // Note: collect and emit is a bit tricky with single source of truth in a simple flow
-        // For a true "Single Source of Truth", we ideally observe DB. 
-        // But here we do a simpler "fetch and save" trigger, and observe DB in UI or here.
-        // Let's use the bound resource pattern logic: Query DB -> Emit -> Fetch -> Save -> Emit
-        
-        // This is a simplified approach using Flow<List> from DAO
-        // We can't easily "emit" the flow itself inside this flow builder unless we use `emitAll`
-        // But we want to fetch as well.
-        
         try {
             val response = api.getTopAnime()
             val (animeEntities, genreEntities, crossRefs) = AnimeMapper.mapToEntities(response.data)
@@ -33,18 +25,10 @@ class AnimeRepository @Inject constructor(
             db.withTransaction {
                 dao.insertAnimeWithGenres(animeEntities, genreEntities, crossRefs)
             }
-            // Logic: if fetch successful, DB is updated.
+            emit(Resource.Success(animeEntities))
         } catch (e: Exception) {
              emit(Resource.Error(e.localizedMessage ?: "Process failed"))
-            // If fetch fails, we still rely on DB. 
-            // In this specific flow structure, maybe simpler to just expose DB Flow separately
-            // and have a 'refresh' suspend function.
-            // BUT, for a "Resource" based stream:
         }
-        
-        // Return DB source of truth
-        // Since getTopAnime might be called repeatedly or we want to observe changes:
-        // Ideally we return local data flow.
     }
     
     // Better Pattern for MVVM + Room + Offline:
