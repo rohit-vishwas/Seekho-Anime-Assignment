@@ -82,6 +82,9 @@ dependencies {
     // Coil
     implementation(libs.coil.compose)
 
+    // YouTube Player
+    implementation(libs.youtube.player)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

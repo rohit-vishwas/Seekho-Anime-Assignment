@@ -16,13 +16,29 @@ object AnimeMapper {
             val anime = AnimeEntity(
                 malId = dto.malId,
                 title = dto.title,
-                synopsis = dto.synopsis,
+                titleEnglish = dto.titleEnglish,
+                titleJapanese = dto.titleJapanese,
+                url = dto.url,
+                type = dto.type,
+                source = dto.source,
                 episodes = dto.episodes,
+                status = dto.status,
+                airing = dto.airing,
+                duration = dto.duration,
+                rating = dto.rating,
                 score = dto.score,
-                rank = 0,
-                popularity = 0,
-                posterUrl = dto.images.jpg.imageUrl,
-                trailerUrl = dto.trailer?.url
+                rank = dto.rank,
+                popularity = dto.popularity,
+                members = dto.members,
+                favorites = dto.favorites,
+                synopsis = dto.synopsis,
+                background = dto.background,
+                season = dto.season,
+                year = dto.year,
+                broadcastString = dto.broadcast?.string,
+                airedString = dto.aired?.string,
+                posterUrl = dto.images.jpg.largeImageUrl ?: dto.images.jpg.imageUrl,
+                trailerUrl = dto.trailer?.embedUrl ?: dto.trailer?.url
             )
             animeList.add(anime)
 
