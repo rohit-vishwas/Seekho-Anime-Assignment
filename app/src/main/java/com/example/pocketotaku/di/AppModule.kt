@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.example.pocketotaku.data.api.JikanApiService
 import com.example.pocketotaku.data.db.AnimeDatabase
 import com.example.pocketotaku.utils.Constants
+import com.example.pocketotaku.utils.GlobalErrorManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -45,4 +46,10 @@ object AppModule {
     @Provides
     @Singleton
     fun provideAnimeDao(db: AnimeDatabase) = db.animeDao()
+
+    @Provides
+    @Singleton
+    fun provideGlobalErrorManager(): GlobalErrorManager {
+        return GlobalErrorManager()
+    }
 }

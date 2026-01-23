@@ -9,9 +9,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
+import com.example.pocketotaku.utils.GlobalErrorManager
+import kotlinx.coroutines.flow.catch
+
 class AnimeRepository @Inject constructor(
     private val api: JikanApiService,
-    private val db: AnimeDatabase
+    private val db: AnimeDatabase,
+    private val globalErrorManager: GlobalErrorManager
 ) {
     private val dao = db.animeDao()
 
@@ -27,12 +31,19 @@ class AnimeRepository @Inject constructor(
             }
             emit(Resource.Success(animeEntities))
         } catch (e: Exception) {
+            globalErrorManager.triggerError()
              emit(Resource.Error(e.localizedMessage ?: "Process failed"))
         }
     }
     
 
+
+
     fun getAnimeListStream() = dao.getAllAnime()
+        .catch { e ->
+            globalErrorManager.triggerError()
+            emit(emptyList())
+        }
 
     suspend fun refreshAnimeList(): Resource<Unit> {
         return try {
@@ -43,6 +54,7 @@ class AnimeRepository @Inject constructor(
             }
             Resource.Success(Unit)
         } catch (e: Exception) {
+            globalErrorManager.triggerError()
             Resource.Error(e.localizedMessage ?: "Network error")
         }
     }
@@ -61,6 +73,7 @@ class AnimeRepository @Inject constructor(
              val newLocal = dao.getAnimeById(id)
              Resource.Success(newLocal ?: response.data)
         } catch (e: Exception) {
+            globalErrorManager.triggerError()
             Resource.Error(e.localizedMessage ?: "Error loading detail")
         }
     }
