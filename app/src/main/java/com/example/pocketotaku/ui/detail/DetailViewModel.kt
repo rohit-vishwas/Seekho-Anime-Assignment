@@ -1,28 +1,23 @@
 package com.example.pocketotaku.ui.detail
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pocketotaku.data.db.AnimeWithGenres
 import com.example.pocketotaku.data.repository.AnimeRepository
 import com.example.pocketotaku.utils.Resource
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class DetailViewModel @Inject constructor(
+class DetailViewModel (
     private val repository: AnimeRepository,
-    savedStateHandle: SavedStateHandle
+    private val animeId: Int
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<DetailUiState>(DetailUiState.Loading)
     val uiState: StateFlow<DetailUiState> = _uiState.asStateFlow()
 
-    private val animeId: Int = checkNotNull(savedStateHandle["animeId"])
 
     init {
         loadAnime(animeId)

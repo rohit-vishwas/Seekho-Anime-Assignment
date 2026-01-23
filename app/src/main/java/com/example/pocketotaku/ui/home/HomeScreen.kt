@@ -39,7 +39,7 @@ fun HomeScreen(
     val state by viewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.navigationEvent.collect { id ->
+        viewModel.navigationEvent.collect { id: Int ->
             onAnimeClick(id)
         }
     }

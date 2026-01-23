@@ -21,14 +21,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import com.example.pocketotaku.ui.component.ErrorToast
 import com.example.pocketotaku.utils.GlobalErrorManager
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
-import javax.inject.Inject
 
-@AndroidEntryPoint
+import org.koin.android.ext.android.inject
+
 class MainActivity : ComponentActivity() {
-    @Inject
-    lateinit var globalErrorManager: GlobalErrorManager
+    private val globalErrorManager: GlobalErrorManager by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

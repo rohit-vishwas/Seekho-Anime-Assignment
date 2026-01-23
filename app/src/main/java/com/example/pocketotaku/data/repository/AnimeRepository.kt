@@ -7,12 +7,12 @@ import com.example.pocketotaku.data.db.AnimeEntity
 import com.example.pocketotaku.utils.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import javax.inject.Inject
+
 
 import com.example.pocketotaku.utils.GlobalErrorManager
 import kotlinx.coroutines.flow.catch
 
-class AnimeRepository @Inject constructor(
+class AnimeRepository (
     private val api: JikanApiService,
     private val db: AnimeDatabase,
     private val globalErrorManager: GlobalErrorManager
