@@ -33,13 +33,9 @@ class DetailViewModel @Inject constructor(
             _uiState.value = DetailUiState.Loading
             when (val result = repository.getAnimeDetail(id)) {
                 is Resource.Success -> {
-                    // Result can be AnimeWithGenres or similar.
-                    // Repository currently returns Any/fallback. 
-                    // Let's assume it returns AnimeWithGenres (as it fetches from DB mostly)
                     if (result.data is AnimeWithGenres) {
                          _uiState.value = DetailUiState.Success(result.data)
                     } else {
-                        // Handle Api Response case directly if DB failed or something
                          _uiState.value = DetailUiState.Error("Unexpected data format")
                     }
                 }

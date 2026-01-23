@@ -33,4 +33,7 @@ interface AnimeDao {
     @Transaction
     @Query("SELECT * FROM anime_table WHERE malId = :id")
     suspend fun getAnimeById(id: Int): AnimeWithGenres?
+
+    @Query("SELECT COUNT(*) FROM anime_table")
+    suspend fun getAnimeCount(): Int
 }

@@ -2,18 +2,24 @@ package com.example.pocketotaku.ui.detail
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.Icon
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,11 +31,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.AsyncImage
+import com.example.pocketotaku.utils.NetworkUtils
 import com.example.pocketotaku.utils.Util.extractYoutubeVideoId
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFramePlayerOptions
@@ -45,6 +56,26 @@ fun YoutubeVideoPlayer(
     if (videoId.isNotEmpty()) {
         var isVideoPlaying by remember { mutableStateOf(false) }
         var isPlayerReady by remember { mutableStateOf(false) }
+        var playerError by remember { mutableStateOf<String?>(null) }
+        val context = LocalContext.current
+
+        fun onPlayClick() {
+            if (NetworkUtils.isInternetAvailable(context)) {
+                isVideoPlaying = true
+                playerError = null
+            } else {
+                playerError = "No internet connection."
+            }
+        }
+
+        fun onRetry() {
+            if (NetworkUtils.isInternetAvailable(context)) {
+                playerError = null
+                isVideoPlaying = true
+            } else {
+                playerError = "No internet connection."
+            }
+        }
 
         Box(
             modifier = modifier
@@ -73,6 +104,15 @@ fun YoutubeVideoPlayer(
                                     youTubePlayer.loadVideo(videoId, 0f)
                                     isPlayerReady = true
                                 }
+
+                                override fun onError(
+                                    youTubePlayer: YouTubePlayer,
+                                    error: PlayerConstants.PlayerError
+                                ) {
+                                    super.onError(youTubePlayer, error)
+                                    isVideoPlaying = false
+                                    playerError = "Something went wrong"
+                                }
                             }, options)
                         }
                     },
@@ -80,11 +120,11 @@ fun YoutubeVideoPlayer(
                 )
             }
 
-            if (!isPlayerReady) {
+            if (!isPlayerReady && playerError == null) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .clickable { isVideoPlaying = true },
+                        .clickable { onPlayClick() },
                     contentAlignment = Alignment.Center
                 ) {
                     AsyncImage(
@@ -115,6 +155,49 @@ fun YoutubeVideoPlayer(
                     }
                 }
             }
+
+            playerError?.let {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable { onPlayClick() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    AsyncImage(
+                        model = posterUrl ?: "",
+                        contentDescription = "Play Video",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(color = Color(0x8B000000))
+                            .padding(top= 32.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = it,
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(
+                            onClick = { onRetry() },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.White,
+                                contentColor = Color.Black
+                            )
+                        ) {
+                            Text("Retry")
+                        }
+                    }
+
+                }
+            }
         }
     } else {
         Box(
@@ -126,5 +209,4 @@ fun YoutubeVideoPlayer(
             Text("Invalid Trailer URL")
         }
     }
-
 }
