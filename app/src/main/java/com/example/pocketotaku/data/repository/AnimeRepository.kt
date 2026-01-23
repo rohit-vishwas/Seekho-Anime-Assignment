@@ -41,7 +41,9 @@ class AnimeRepository @Inject constructor(
 
     fun getAnimeListStream() = dao.getAllAnime()
         .catch { e ->
-            globalErrorManager.triggerError()
+            if (dao.getAnimeCount() > 0) {
+                globalErrorManager.triggerError()
+            }
             emit(emptyList())
         }
 
@@ -54,7 +56,9 @@ class AnimeRepository @Inject constructor(
             }
             Resource.Success(Unit)
         } catch (e: Exception) {
-            globalErrorManager.triggerError()
+            if (dao.getAnimeCount() > 0) {
+                globalErrorManager.triggerError()
+            }
             Resource.Error(e.localizedMessage ?: "Network error")
         }
     }
@@ -73,8 +77,11 @@ class AnimeRepository @Inject constructor(
              val newLocal = dao.getAnimeById(id)
              Resource.Success(newLocal ?: response.data)
         } catch (e: Exception) {
-            globalErrorManager.triggerError()
             Resource.Error(e.localizedMessage ?: "Error loading detail")
         }
+    }
+
+    suspend fun isDatabaseEmpty(): Boolean {
+        return dao.getAnimeCount() == 0
     }
 }
