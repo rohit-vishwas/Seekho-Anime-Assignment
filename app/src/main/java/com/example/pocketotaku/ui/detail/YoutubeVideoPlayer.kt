@@ -1,48 +1,114 @@
 package com.example.pocketotaku.ui.detail
 
-import android.view.ViewGroup
-import android.webkit.WebChromeClient
-import android.webkit.WebView
-import android.webkit.WebViewClient
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import coil.compose.AsyncImage
+import com.example.pocketotaku.utils.Util.extractYoutubeVideoId
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFramePlayerOptions
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
 
 @Composable
 fun YoutubeVideoPlayer(
-    url: String,
+    trailerUrl: String,
+    posterUrl: String?,
     modifier: Modifier = Modifier
 ) {
-    AndroidView(
-        factory = { context ->
-            WebView(context).apply {
-                layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
-                settings.apply {
-                    javaScriptEnabled = true
-                    domStorageEnabled = true
-                    mediaPlaybackRequiresUserGesture = false
-                    mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-                    loadWithOverviewMode = true
-                    useWideViewPort = true
-                }
+    val videoId = extractYoutubeVideoId(trailerUrl)
+    if (videoId.isNotEmpty()) {
+        var isVideoPlaying by remember { mutableStateOf(false) }
+        if (isVideoPlaying) {
+            val lifecycleOwner = LocalLifecycleOwner.current
+            AndroidView(
+                factory = { context ->
+                    YouTubePlayerView(context).apply {
+                        lifecycleOwner.lifecycle.addObserver(this)
+                        enableAutomaticInitialization = false
 
-                webChromeClient = WebChromeClient()
-                webViewClient = WebViewClient()
+                        val options = IFramePlayerOptions.Builder(context = context)
+                            .controls(1)
+                            .rel(0)
+                            .ivLoadPolicy(3)
+                            .ccLoadPolicy(0)
+                            .build()
+
+                        initialize(object : AbstractYouTubePlayerListener() {
+                            override fun onReady(youTubePlayer: YouTubePlayer) {
+                                youTubePlayer.loadVideo(videoId, 0f)
+                            }
+                        }, options)
+                    }
+                },
+                modifier = modifier
+                    .fillMaxWidth()
+                    .aspectRatio(16f / 9f)
+                    .clip(shape = RoundedCornerShape(16.dp))
+            )
+        } else {
+            Box(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .aspectRatio(16f / 9f)
+                    .clip(shape = RoundedCornerShape(16.dp))
+                    .clickable { isVideoPlaying = true },
+                contentAlignment = Alignment.Center
+            ) {
+                AsyncImage(
+                    model = posterUrl ?: "",
+                    contentDescription = "Play Video",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+                Box(
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .clip(shape = CircleShape)
+                        .background(color = Color(0x66000000))
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = "Play",
+                        tint = Color.White,
+                        modifier = Modifier.size(48.dp)
+                    )
+                }
             }
-        },
-        update = { webView ->
-            if (webView.url != url) {
-                webView.loadUrl(url)
-            }
-        },
-        modifier = modifier,
-        onRelease = { webView ->
-            webView.stopLoading()
-            webView.onPause()
-            webView.destroy()
         }
-    )
+    } else {
+        Box(
+            modifier = modifier
+                .fillMaxWidth()
+                .aspectRatio(16f / 9f),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("Invalid Trailer URL")
+        }
+    }
+
 }
