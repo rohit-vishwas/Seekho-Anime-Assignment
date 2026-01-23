@@ -26,17 +26,17 @@ data class AnimeEntity(
     val background: String?,
     val season: String?,
     val year: Int?,
-    val broadcastString: String?, // Storing as String to simplify
-    val airedString: String?,     // Storing as String to simplify
+    val broadcastString: String?,
+    val airedString: String?,
     val posterUrl: String?,
     val trailerUrl: String?,
-    val isFavorite: Boolean = false // User preference
+    val isFavorite: Boolean = false
 )
 
 @Entity(tableName = "genre_table")
 data class GenreEntity(
     @PrimaryKey
-    val malId: Int, // The genre's ID from API
+    val malId: Int,
     val name: String
 )
 

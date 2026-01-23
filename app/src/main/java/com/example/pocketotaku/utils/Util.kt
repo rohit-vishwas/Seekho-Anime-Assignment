@@ -1,7 +1,5 @@
 package com.example.pocketotaku.utils
 
-import com.example.pocketotaku.utils.Constants.YOUTUBE_URL
-
 object Util {
 
     fun extractYoutubeVideoId(url: String?): String {

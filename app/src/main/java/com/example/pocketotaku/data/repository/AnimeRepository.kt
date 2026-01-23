@@ -31,11 +31,9 @@ class AnimeRepository @Inject constructor(
         }
     }
     
-    // Better Pattern for MVVM + Room + Offline:
-    // Expose Flow<List<Anime>> from DB
+
     fun getAnimeListStream() = dao.getAllAnime()
-    
-    // Suspend function to refresh data
+
     suspend fun refreshAnimeList(): Resource<Unit> {
         return try {
             val response = api.getTopAnime()
@@ -49,26 +47,19 @@ class AnimeRepository @Inject constructor(
         }
     }
 
-    suspend fun getAnimeDetail(id: Int): Resource<Any> { // Returning Any for now, ideally Domain Model
-        // Check DB
+    suspend fun getAnimeDetail(id: Int): Resource<Any> {
         val local = dao.getAnimeById(id)
         if (local != null) {
             return Resource.Success(local)
         }
-        // Fetch if missing
         return try {
             val response = api.getAnimeDetails(id)
-            // Just return it or save it?
-            // "Store fetched anime data locally" - yes.
-            // Only current anime? 
-            // The API returns SingleAnimeResponse. 
-            // We can reuse mapper for a single item (wrap in list)
             val (animeEntities, genreEntities, crossRefs) = AnimeMapper.mapToEntities(listOf(response.data))
             db.withTransaction {
                 dao.insertAnimeWithGenres(animeEntities, genreEntities, crossRefs)
             }
              val newLocal = dao.getAnimeById(id)
-             Resource.Success(newLocal ?: response.data) // Fallback to data
+             Resource.Success(newLocal ?: response.data)
         } catch (e: Exception) {
             Resource.Error(e.localizedMessage ?: "Error loading detail")
         }
