@@ -144,7 +144,7 @@ fun AnimeDetailContent(animeData: AnimeWithGenres) {
                                 Text(
                                     text = it.toString() ,
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    fontWeight = FontWeight.SemiBold
                                 )
                                 Text("•", color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
