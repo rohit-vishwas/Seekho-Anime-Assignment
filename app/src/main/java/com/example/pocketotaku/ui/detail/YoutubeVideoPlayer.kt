@@ -126,5 +126,4 @@ fun YoutubeVideoPlayer(
             Text("Invalid Trailer URL")
         }
     }
-
 }
