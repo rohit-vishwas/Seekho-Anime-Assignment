@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -43,60 +44,75 @@ fun YoutubeVideoPlayer(
     val videoId = extractYoutubeVideoId(trailerUrl)
     if (videoId.isNotEmpty()) {
         var isVideoPlaying by remember { mutableStateOf(false) }
-        if (isVideoPlaying) {
-            val lifecycleOwner = LocalLifecycleOwner.current
-            AndroidView(
-                factory = { context ->
-                    YouTubePlayerView(context).apply {
-                        lifecycleOwner.lifecycle.addObserver(this)
-                        enableAutomaticInitialization = false
+        var isPlayerReady by remember { mutableStateOf(false) }
 
-                        val options = IFramePlayerOptions.Builder(context = context)
-                            .controls(1)
-                            .rel(0)
-                            .ivLoadPolicy(3)
-                            .ccLoadPolicy(0)
-                            .build()
+        Box(
+            modifier = modifier
+                .fillMaxWidth()
+                .aspectRatio(16f / 9f)
+                .clip(shape = RoundedCornerShape(16.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            if (isVideoPlaying) {
+                val lifecycleOwner = LocalLifecycleOwner.current
+                AndroidView(
+                    factory = { context ->
+                        YouTubePlayerView(context).apply {
+                            lifecycleOwner.lifecycle.addObserver(this)
+                            enableAutomaticInitialization = false
 
-                        initialize(object : AbstractYouTubePlayerListener() {
-                            override fun onReady(youTubePlayer: YouTubePlayer) {
-                                youTubePlayer.loadVideo(videoId, 0f)
-                            }
-                        }, options)
-                    }
-                },
-                modifier = modifier
-                    .fillMaxWidth()
-                    .aspectRatio(16f / 9f)
-                    .clip(shape = RoundedCornerShape(16.dp))
-            )
-        } else {
-            Box(
-                modifier = modifier
-                    .fillMaxWidth()
-                    .aspectRatio(16f / 9f)
-                    .clip(shape = RoundedCornerShape(16.dp))
-                    .clickable { isVideoPlaying = true },
-                contentAlignment = Alignment.Center
-            ) {
-                AsyncImage(
-                    model = posterUrl ?: "",
-                    contentDescription = "Play Video",
-                    contentScale = ContentScale.Crop,
+                            val options = IFramePlayerOptions.Builder(context = context)
+                                .controls(1)
+                                .rel(0)
+                                .ivLoadPolicy(3)
+                                .ccLoadPolicy(0)
+                                .build()
+
+                            initialize(object : AbstractYouTubePlayerListener() {
+                                override fun onReady(youTubePlayer: YouTubePlayer) {
+                                    youTubePlayer.loadVideo(videoId, 0f)
+                                    isPlayerReady = true
+                                }
+                            }, options)
+                        }
+                    },
                     modifier = Modifier.fillMaxSize()
                 )
+            }
+
+            if (!isPlayerReady) {
                 Box(
                     modifier = Modifier
-                        .padding(2.dp)
-                        .clip(shape = CircleShape)
-                        .background(color = Color(0x66000000))
+                        .fillMaxSize()
+                        .clickable { isVideoPlaying = true },
+                    contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.PlayArrow,
-                        contentDescription = "Play",
-                        tint = Color.White,
-                        modifier = Modifier.size(48.dp)
+                    AsyncImage(
+                        model = posterUrl ?: "",
+                        contentDescription = "Play Video",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
                     )
+                    Box(
+                        modifier = Modifier
+                            .clip(shape = CircleShape)
+                            .background(color = Color(0x66000000))
+                            .padding(8.dp)
+                    ) {
+                        if (isVideoPlaying) {
+                            CircularProgressIndicator(
+                                color = Color.White,
+                                modifier = Modifier.size(48.dp)
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.PlayArrow,
+                                contentDescription = "Play",
+                                tint = Color.White,
+                                modifier = Modifier.size(48.dp)
+                            )
+                        }
+                    }
                 }
             }
         }
