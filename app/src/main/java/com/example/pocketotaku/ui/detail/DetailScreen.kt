@@ -46,8 +46,7 @@ fun DetailScreen(
         }
     ) { padding ->
         Box(
-            modifier = Modifier
-                .padding(bottom = padding.calculateBottomPadding())
+            modifier = Modifier.fillMaxSize()
         ) {
             when (val uiState = state) {
                 is DetailUiState.Loading -> Box(

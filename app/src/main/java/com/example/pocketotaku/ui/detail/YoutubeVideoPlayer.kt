@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
@@ -80,8 +79,7 @@ fun YoutubeVideoPlayer(
         Box(
             modifier = modifier
                 .fillMaxWidth()
-                .aspectRatio(16f / 9f)
-                .clip(shape = RoundedCornerShape(16.dp)),
+                .aspectRatio(16f / 9f),
             contentAlignment = Alignment.Center
         ) {
             if (isVideoPlaying) {
@@ -174,7 +172,7 @@ fun YoutubeVideoPlayer(
                         modifier = Modifier
                             .fillMaxSize()
                             .background(color = Color(0x8B000000))
-                            .padding(top= 32.dp),
+                            .padding(top = 32.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
